@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Finance Role Transformation Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#0A1628;--blue:#0F62FE;--blue-light:#4589FF;--blue-pale:#EEF4FF;--blue-mid:#C6D6FF;
+  --teal:#00B0A0;--amber:#F59E0B;--red:#DC2626;--purple:#8B5CF6;--pink:#EC4899;--green:#10B981;
+  --slate:#64748B;--bg:#F0F4FB;--surface:#FFFFFF;--border:#DDE6F5;--text:#0A1628;--muted:#64748B;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-logo{width:32px;height:32px;background:var(--blue);border-radius:8px;display:grid;place-items:center}
+.nav-logo svg{width:17px;height:17px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-title{font-family:'DM Serif Display',serif;font-size:0.98rem;color:white;letter-spacing:.01em}
+.nav-tabs{display:flex;gap:2px}
+.nav-tab{padding:8px 18px;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500;color:rgba(255,255,255,0.55);transition:all .2s;border:none;background:none}
+.nav-tab:hover{color:white;background:rgba(255,255,255,0.06)}
+.nav-tab.active{color:white;background:rgba(15,98,254,0.35)}
+
+/* PAGE */
+.page{display:none;padding:32px;max-width:1400px;margin:0 auto;animation:fadeUp .3s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#0F2D6E 55%,#0F62FE 100%);border-radius:20px;padding:36px 40px;margin-bottom:24px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-40px;width:320px;height:320px;background:radial-gradient(circle,rgba(15,98,254,.22) 0%,transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-80px;left:35%;width:400px;height:280px;background:radial-gradient(circle,rgba(0,176,160,.1) 0%,transparent 70%);pointer-events:none}
+.hero-tag{display:inline-block;background:rgba(15,98,254,.28);color:#A8C8FF;font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:4px 12px;border-radius:999px;margin-bottom:14px;border:1px solid rgba(15,98,254,.4)}
+.hero h1{font-family:'DM Serif Display',serif;font-size:2.3rem;color:white;line-height:1.15;margin-bottom:10px;position:relative;z-index:1}
+.hero p{color:#B8CCEE;font-size:.97rem;line-height:1.6;max-width:560px;position:relative;z-index:1}
+
+/* STAT ROW */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s}
+.stat-card:hover{box-shadow:0 8px 28px rgba(15,28,63,.1);transform:translateY(-2px)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+.sc-blue::before{background:var(--blue)}
+.sc-teal::before{background:var(--teal)}
+.sc-amber::before{background:var(--amber)}
+.stat-label{color:var(--muted);font-size:.77rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.stat-value{font-family:'DM Serif Display',serif;font-size:2.6rem;color:var(--navy);line-height:1;margin-bottom:6px}
+.stat-sub{color:var(--slate);font-size:.81rem}
+.stat-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.sp{padding:3px 10px;border-radius:999px;font-size:.73rem;font-weight:700}
+.sp-a{background:#E0EDFF;color:#0047B3}
+.sp-g{background:#E0FFF9;color:#007A6E}
+.sp-e{background:#FFF4E0;color:#B45309}
+
+/* SECTION HEADER */
+.sec-head{margin-bottom:20px}
+.sec-title{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--navy);margin-bottom:3px}
+.sec-sub{color:var(--muted);font-size:.86rem}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 24px}
+.card-title{font-weight:700;font-size:.9rem;color:var(--navy);margin-bottom:4px}
+.card-sub{font-size:.8rem;color:var(--muted);margin-bottom:14px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 11px;border-radius:999px;font-size:.73rem;font-weight:700;letter-spacing:.02em}
+.b-high{background:#FEE2E2;color:#B91C1C}
+.b-medium{background:#FEF3C7;color:#B45309}
+.b-foundational{background:#EEF4FF;color:#1D4ED8}
+.b-automate{background:#EEF4FF;color:#0047B3}
+.b-augment{background:#E6FBF8;color:#007A6E}
+.b-elevate{background:#FFF8EC;color:#B45309}
+.b-low{background:#DCFCE7;color:#15803D}
+
+/* BUBBLE CHART */
+.bubble-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px}
+.bubble-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:12px}
+.bubble-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}
+.bl-item{display:flex;align-items:center;gap:6px;font-size:.76rem;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .15s}
+.bl-item:hover{background:var(--bg)}
+.bl-dot{width:11px;height:11px;border-radius:50%}
+#bubbleCanvas{width:100%;cursor:crosshair}
+.bubble-tooltip{position:fixed;background:var(--navy);color:white;padding:10px 14px;border-radius:10px;font-size:.8rem;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200;max-width:220px;line-height:1.5}
+.bubble-tooltip strong{font-size:.85rem;display:block;margin-bottom:4px}
+.bubble-axis-label{font-size:.75rem;color:var(--muted);font-weight:600;text-align:center}
+
+/* TOP 10 */
+.top10-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:28px}
+.top10-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .18s}
+.top10-item:hover{border-color:var(--blue-mid);box-shadow:0 4px 16px rgba(15,98,254,.1);transform:translateY(-1px)}
+.top10-rank{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--blue-mid);width:28px;flex-shrink:0;text-align:center}
+.top10-info{flex:1;min-width:0}
+.top10-role{font-weight:700;font-size:.87rem;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top10-tower{font-size:.75rem;color:var(--muted)}
+.top10-bar-wrap{width:70px;flex-shrink:0}
+.top10-bar-bg{height:6px;background:var(--bg);border-radius:999px;overflow:hidden;margin-bottom:4px}
+.top10-bar-fill{height:100%;border-radius:999px;background:var(--blue);transition:width .6s ease}
+.top10-pct{font-size:.75rem;font-weight:700;color:var(--navy);text-align:right}
+
+/* TOWER TABS */
+.tower-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.tower-tab{padding:8px 16px;border-radius:10px;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--muted);background:var(--surface);border:1.5px solid var(--border);transition:all .18s}
+.tower-tab:hover{color:var(--navy);border-color:var(--blue-mid)}
+.tower-tab.active{color:white;background:var(--blue);border-color:var(--blue)}
+
+/* ROLE CARDS GRID */
+.role-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-bottom:24px}
+.role-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.role-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:14px 0 0 14px}
+.rc-automate::before{background:var(--blue)}
+.rc-augment::before{background:var(--teal)}
+.rc-elevate::before{background:var(--amber)}
+.role-card:hover{border-color:var(--blue-mid);box-shadow:0 6px 20px rgba(15,98,254,.12);transform:translateY(-2px)}
+.role-card.selected{border-color:var(--blue);box-shadow:0 0 0 3px rgba(15,98,254,.15)}
+.rc-role{font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:4px;line-height:1.3}
+.rc-future{font-size:.74rem;color:var(--blue);margin-bottom:10px;font-weight:500}
+.rc-metrics{display:flex;gap:8px;margin-bottom:10px}
+.rc-metric{flex:1;text-align:center;background:var(--bg);border-radius:7px;padding:6px 4px}
+.rc-metric-val{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);line-height:1}
+.rc-metric-lbl{font-size:.64rem;color:var(--muted);margin-top:2px}
+.rc-badges{display:flex;gap:4px;flex-wrap:wrap}
+
+/* ROLE DETAIL */
+.role-detail-panel{animation:fadeUp .25s ease}
+.so-what{background:linear-gradient(90deg,#EEF4FF,#F0FBF9);border:1px solid #C6D6FF;border-left:4px solid var(--blue);border-radius:12px;padding:14px 18px;margin-bottom:20px}
+.sw-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--blue);margin-bottom:5px}
+.sw-text{font-size:.9rem;color:var(--navy);line-height:1.55;font-weight:500}
+
+/* METRICS ROW */
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.metric-block{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:16px 18px}
+.mb-label{font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px}
+.mb-value{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--navy);line-height:1;margin-bottom:6px}
+.mb-bar{height:5px;background:var(--bg);border-radius:999px;overflow:hidden;margin-bottom:6px}
+.mb-fill{height:100%;border-radius:999px;transition:width .7s ease}
+.mb-sub{font-size:.74rem;color:var(--muted)}
+
+/* DETAIL GRID */
+.detail-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+
+/* TASK BARS */
+.task-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.task-name{font-size:.78rem;font-weight:600;color:var(--muted);width:76px;flex-shrink:0}
+.task-bar-bg{flex:1;height:7px;background:var(--bg);border-radius:999px;overflow:hidden}
+.task-bar-fill{height:100%;border-radius:999px;transition:width .6s ease}
+.tb-r{background:var(--blue)}
+.tb-v{background:var(--teal)}
+.tb-a{background:var(--purple)}
+.tb-j{background:var(--amber)}
+.task-pct{font-size:.78rem;font-weight:700;color:var(--navy);width:30px;text-align:right}
+
+/* FOCUS BOX */
+.focus-box{background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.fb-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px}
+.fb-text{font-size:.84rem;color:var(--navy);line-height:1.5}
+
+/* SKILL PILLS */
+.skill-pill{display:inline-block;padding:4px 11px;border-radius:7px;font-size:.76rem;font-weight:500;background:var(--blue-pale);color:var(--blue);border:1px solid var(--blue-mid);margin:3px 3px 3px 0}
+
+/* COMPLEXITY DOTS */
+.cx-dots{display:flex;gap:4px;margin-top:8px}
+.cx-dot{width:10px;height:10px;border-radius:50%;background:var(--border)}
+.cx-dot.on-high{background:var(--red)}
+.cx-dot.on-medium{background:var(--amber)}
+.cx-dot.on-low{background:var(--green)}
+
+/* ROADMAP */
+.roadmap-phases{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative;margin-bottom:20px}
+.roadmap-phases::before{content:'';position:absolute;top:22px;left:calc(16.66% + 16px);right:calc(16.66% + 16px);height:2px;background:linear-gradient(90deg,var(--blue),var(--teal),var(--amber));z-index:0}
+.phase-head{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:1}
+.phase-dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:800;color:white;letter-spacing:.03em}
+.pd-auto{background:var(--blue)}
+.pd-aug{background:var(--teal)}
+.pd-elev{background:var(--amber)}
+.phase-label{font-size:.78rem;font-weight:700;color:var(--navy);text-align:center}
+.phase-sub{font-size:.7rem;color:var(--muted);text-align:center;line-height:1.4}
+.roadmap-towers{display:flex;flex-direction:column;gap:10px}
+.roadmap-row{display:grid;grid-template-columns:140px 1fr 1fr 1fr;align-items:start;gap:4px}
+.tower-lbl{font-size:.76rem;font-weight:700;color:var(--navy);padding-top:4px;display:flex;align-items:center;gap:6px}
+.tower-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.roadmap-chips{display:flex;flex-wrap:wrap;gap:4px;padding:3px 0}
+.r-chip{padding:3px 10px;border-radius:6px;font-size:.7rem;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .15s}
+.r-chip:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.chip-a{background:#EEF4FF;color:#0047B3;border-color:#C6D6FF}
+.chip-g{background:#E6FBF8;color:#007A6E;border-color:#B0EDE6}
+.chip-e{background:#FFF8EC;color:#B45309;border-color:#FDDBA0}
+.enablement-bars{margin-top:16px}
+
+/* DEF GRID */
+.def-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.def-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:18px 20px}
+.def-card-title{font-weight:700;color:var(--navy);font-size:.93rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.def-icon{width:28px;height:28px;border-radius:7px;background:var(--blue-pale);display:grid;place-items:center;flex-shrink:0}
+.def-icon svg{width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.def-body{font-size:.83rem;color:var(--muted);line-height:1.6}
+.def-body strong{color:var(--navy)}
+
+/* MISC */
+hr.div{border:none;border-top:1px solid var(--border);margin:20px 0}
+.footnote{color:var(--muted);font-size:.78rem;text-align:center;padding:20px 32px;border-top:1px solid var(--border);max-width:1400px;margin:0 auto}
+
+/* FILTER SELECT */
+.fsel{padding:7px 13px;border:1px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.83rem;color:var(--navy);background:var(--surface);cursor:pointer;outline:none}
+.fsel:focus{border-color:var(--blue)}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:999px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <span class="nav-title">Finance Transformation Explorer</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('overview')">Overview</button>
+    <button class="nav-tab" onclick="showPage('explorer')">Role Explorer</button>
+    <button class="nav-tab" onclick="showPage('roadmap')">Roadmap</button>
+    <button class="nav-tab" onclick="showPage('methodology')">Methodology</button>
+  </div>
+</nav>
+
+<div id="page-overview" class="page active">
+  <div class="hero">
+    <div class="hero-tag">AI-Enabled Finance Operating Model</div>
+    <h1>Finance Role<br/>Transformation Intelligence</h1>
+    <p>56 finance roles across 7 towers — mapped by AI impact, capacity release, and transformation priority.</p>
+  </div>
+  <div class="stats-row" id="heroStats"></div>
+  <div class="bubble-wrap">
+    <div class="bubble-header">
+      <div>
+        <div style="font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:3px">Role Transformation Landscape</div>
+        <div style="font-size:.82rem;color:var(--muted)">Bubble size = transformation priority score · Hover a bubble for details · Click to explore role</div>
+      </div>
+      <select class="fsel" id="bubbleTowerFilter" onchange="drawBubble()">
+        <option value="All">All Towers</option>
+      </select>
+    </div>
+    <canvas id="bubbleCanvas" height="420"></canvas>
+    <div style="display:flex;justify-content:center;margin-top:6px"><div class="bubble-axis-label" style="width:100%">← Work Reshaped by AI % →</div></div>
+    <div class="bubble-legend" id="bubbleLegend"></div>
+  </div>
+  <div class="sec-head">
+    <div class="sec-title">Top 10 Transformation Priorities</div>
+    <div class="sec-sub">Roles ranked by composite transformation priority score — click any to explore</div>
+  </div>
+  <div class="top10-grid" id="top10Grid"></div>
+</div>
+
+<div id="page-explorer" class="page">
+  <div class="sec-head">
+    <div class="sec-title">Role Explorer</div>
+    <div class="sec-sub">Select a finance tower, then click a role card to explore its full transformation profile</div>
+  </div>
+  <div class="tower-tabs" id="towerTabs"></div>
+  <div class="role-cards-grid" id="roleCardsGrid"></div>
+  <div id="roleDetailPanel"></div>
+</div>
+
+<div id="page-roadmap" class="page">
+  <div class="sec-head">
+    <div class="sec-title">Transformation Roadmap</div>
+    <div class="sec-sub">Roles plotted across transformation phases by Finance Tower — click any chip to explore the role</div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="roadmap-phases">
+      <div class="phase-head"><div class="phase-dot pd-auto">Phase 1</div><div class="phase-label">Automate</div><div class="phase-sub">Routine & rule-based work<br/>replaced by AI workflows</div></div>
+      <div class="phase-head"><div class="phase-dot pd-aug">Phase 2</div><div class="phase-label">Augment</div><div class="phase-sub">AI assists human work;<br/>people remain central</div></div>
+      <div class="phase-head"><div class="phase-dot pd-elev">Phase 3</div><div class="phase-label">Elevate</div><div class="phase-sub">AI frees roles for strategic<br/>judgment & leadership</div></div>
+    </div>
+    <hr class="div"/>
+    <div class="roadmap-towers" id="roadmapContent"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Enablement Distribution</div>
+    <div class="card-sub">Share of roles in each transformation phase</div>
+    <div id="enablementBars"></div>
+  </div>
+</div>
+
+<div id="page-methodology" class="page">
+  <div class="sec-head">
+    <div class="sec-title">Definitions & Methodology</div>
+    <div class="sec-sub">Key terms, indicators, and calculation logic used throughout the explorer</div>
+  </div>
+  <div class="def-grid" id="defGrid"></div>
+</div>
+
+<div class="bubble-tooltip" id="bubbleTip"></div>
+
+<script>
+// ── DATA ───────────────────────────────────────────────────────────────────
+const ROLES=[
+  {tower:"Procure to Pay",role:"AP Analyst",routine:45,validation:30,analytical:15,judgment:10,workReshaped:55,capacityFreed:25,futureTitle:"AP Exception & Workflow Analyst",opportunity:"Invoice automation",currentFocus:"Invoice processing, validation, and workflow routing",futureFocus:"Exception management, workflow monitoring, and supplier issue resolution",tasksReduce:"Invoice entry, duplicate checks, standard validation, routine routing",tasksGrow:"Exception handling, supplier coordination, workflow supervision, issue triage",skills:"Workflow monitoring; Supplier coordination; Exception analytics; Finance AI tools",skillPriority:"High",changeComplexity:"High",changeDriver:"Role identity shift",changeRationale:"A large share of routine transactional work reduces, fundamentally changing the day-to-day identity of the role and requiring strong reskilling.",enablement:"Automate"},
+  {tower:"Procure to Pay",role:"Invoice Processing Specialist",routine:50,validation:30,analytical:10,judgment:10,workReshaped:60,capacityFreed:28,futureTitle:"Invoice Automation Supervisor",opportunity:"Invoice automation",currentFocus:"Invoice capture, coding, validation, and standard issue handling",futureFocus:"Automation supervision, quality control, and exception-led resolution",tasksReduce:"Manual capture, repetitive coding, standard validation, basic query handling",tasksGrow:"Automation monitoring, exception routing, quality review, escalation support",skills:"AI workflow monitoring; Invoice automation tools; Quality review; Exception handling",skillPriority:"High",changeComplexity:"High",changeDriver:"Role identity shift",changeRationale:"This role undergoes one of the clearest shifts from execution to exception-led oversight.",enablement:"Automate"},
+  {tower:"Procure to Pay",role:"Payment Processing Analyst",routine:40,validation:30,analytical:20,judgment:10,workReshaped:50,capacityFreed:22,futureTitle:"Digital Payment Operations Analyst",opportunity:"Payment automation",currentFocus:"Payment execution, approval checks, and transaction handling",futureFocus:"Payment control monitoring, exception management, and risk review",tasksReduce:"Manual payment execution, repetitive approvals, standard transaction checks",tasksGrow:"Payment anomaly review, workflow supervision, fraud-sensitive monitoring",skills:"Controls monitoring; Workflow supervision; Payment analytics; Issue triage",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Work redesign",changeRationale:"The work mix changes meaningfully, but the role remains operationally relevant because control-intensive activities continue.",enablement:"Automate"},
+  {tower:"Procure to Pay",role:"Vendor Master Data Analyst",routine:35,validation:30,analytical:20,judgment:15,workReshaped:45,capacityFreed:18,futureTitle:"Vendor Data Governance Analyst",opportunity:"Master data automation",currentFocus:"Vendor data maintenance, updates, validation, and correction handling",futureFocus:"Vendor data governance, quality assurance, and stewardship leadership",tasksReduce:"Manual vendor updates, bulk corrections, repetitive field checks",tasksGrow:"Data governance, quality review, stewardship rules, master data assurance",skills:"Data governance; Data quality; Stewardship; Process standardization",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Role elevation",changeRationale:"The role shifts positively from maintenance to governance, which is easier to position but still requires capability uplift.",enablement:"Automate"},
+  {tower:"Procure to Pay",role:"Expense Audit Analyst",routine:30,validation:40,analytical:20,judgment:10,workReshaped:35,capacityFreed:14,futureTitle:"AI-Assisted Expense Compliance Analyst",opportunity:"Expense compliance automation",currentFocus:"Policy checks, expense validation, and compliance review",futureFocus:"Exception-led compliance analysis and targeted risk review",tasksReduce:"Routine policy checks, repeated flagging, standard audit review",tasksGrow:"Anomaly interpretation, exception review, targeted compliance intervention",skills:"Compliance analytics; Policy interpretation; Exception review; Control judgment",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Automation exposure + control sensitivity",changeRationale:"The role evolves rather than disappears, driven mainly by trust in AI-supported screening.",enablement:"Augment"},
+  {tower:"Procure to Pay",role:"Procurement Operations Analyst",routine:35,validation:25,analytical:25,judgment:15,workReshaped:40,capacityFreed:15,futureTitle:"Procurement Workflow Analyst",opportunity:"Workflow automation",currentFocus:"Process coordination, operational follow-up, and issue handling",futureFocus:"Workflow orchestration, issue triage, and service performance management",tasksReduce:"Manual coordination, standard follow-ups, handoff tracking",tasksGrow:"Workflow supervision, escalation management, service issue resolution",skills:"Workflow orchestration; Process monitoring; Vendor coordination; Service analytics",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Work redesign",changeRationale:"Automation reduces coordination-heavy tasks while the role remains critical in keeping process flow healthy.",enablement:"Automate"},
+  {tower:"Procure to Pay",role:"AP Helpdesk Analyst",routine:30,validation:25,analytical:20,judgment:25,workReshaped:34,capacityFreed:12,futureTitle:"Digital AP Service Analyst",opportunity:"Case management automation",currentFocus:"Supplier query handling, ticket triage, and issue follow-up",futureFocus:"Complex case resolution, issue analytics, and service improvement",tasksReduce:"Basic ticket triage, repetitive query responses, standard follow-up",tasksGrow:"Complex case handling, root-cause analysis, service performance insights",skills:"Case triage; Service analytics; Supplier communication; Issue resolution",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Interaction model shift",changeRationale:"The role becomes more complex-case oriented rather than being heavily reduced.",enablement:"Augment"},
+  {tower:"Procure to Pay",role:"P2P Operations Manager",routine:10,validation:20,analytical:40,judgment:30,workReshaped:20,capacityFreed:6,futureTitle:"P2P Digital Operations Leader",opportunity:"P2P transformation leadership",currentFocus:"Team supervision, operational performance, and issue escalation",futureFocus:"Automation governance, value realization, and team transformation leadership",tasksReduce:"Manual supervision, status chasing, fragmented operational oversight",tasksGrow:"Digital governance, coaching through role redesign, adoption and value tracking",skills:"Digital leadership; Automation governance; Value realization; Change leadership",skillPriority:"High",changeComplexity:"High",changeDriver:"Leadership model shift",changeRationale:"Manager expectations change sharply as success moves from throughput supervision to digital governance.",enablement:"Elevate"},
+  {tower:"Order to Cash",role:"Billing Analyst",routine:45,validation:25,analytical:20,judgment:10,workReshaped:48,capacityFreed:20,futureTitle:"Smart Billing Operations Analyst",opportunity:"Billing automation",currentFocus:"Billing generation, validation, and exception follow-up",futureFocus:"Billing quality oversight, anomaly investigation, and exception handling",tasksReduce:"Invoice creation, standard validation, repetitive billing corrections",tasksGrow:"Billing anomaly resolution, quality monitoring, issue investigation",skills:"Exception resolution; Workflow supervision; Billing quality review; Finance AI tools",skillPriority:"Medium",changeComplexity:"High",changeDriver:"Role identity shift",changeRationale:"A visible portion of the role's traditional workload disappears so the future role must be clearly redefined.",enablement:"Automate"},
+  {tower:"Order to Cash",role:"Cash Application Analyst",routine:50,validation:25,analytical:15,judgment:10,workReshaped:52,capacityFreed:24,futureTitle:"Auto-Match Supervision Analyst",opportunity:"Cash application automation",currentFocus:"Manual cash matching, reconciliation, and posting support",futureFocus:"Exception-based reconciliation, unresolved match analysis, and quality monitoring",tasksReduce:"Manual matching, routine posting, standard reconciliation steps",tasksGrow:"Exception investigation, unresolved cash analysis, quality review",skills:"Reconciliation analytics; Exception triage; Workflow monitoring; Root-cause analysis",skillPriority:"Medium",changeComplexity:"High",changeDriver:"Role identity shift",changeRationale:"One of the clearest examples of role redesign — work shifts from matching to investigation.",enablement:"Automate"},
+  {tower:"Order to Cash",role:"Collections Analyst",routine:25,validation:20,analytical:35,judgment:20,workReshaped:35,capacityFreed:12,futureTitle:"Predictive Collections Analyst",opportunity:"Predictive collections",currentFocus:"Collections follow-up, account review, and recovery support",futureFocus:"Risk-based intervention, complex customer negotiation, and recovery strategy",tasksReduce:"Routine reminders, repetitive contact, basic account prioritization",tasksGrow:"Negotiation, complex case handling, predictive intervention planning",skills:"Negotiation; Predictive analytics; Customer judgment; Recovery strategy",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Interaction model shift",changeRationale:"The role becomes smarter and more targeted rather than dramatically smaller.",enablement:"Augment"},
+  {tower:"Order to Cash",role:"Credit Analyst",routine:20,validation:30,analytical:30,judgment:20,workReshaped:28,capacityFreed:8,futureTitle:"Intelligent Credit Risk Analyst",opportunity:"Credit risk analytics",currentFocus:"Credit assessments, limit reviews, and approval support",futureFocus:"AI-supported credit decisions, early warning analysis, and risk interpretation",tasksReduce:"Manual scoring, standard assessments, routine limit reviews",tasksGrow:"Interpretation, escalation judgment, model validation, exposure commentary",skills:"Risk analytics; Decision framing; Financial modeling; Escalation judgment",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Control sensitivity",changeRationale:"The role becomes more insight-led but trust in AI recommendations and governance remain essential.",enablement:"Augment"},
+  {tower:"Order to Cash",role:"Dispute Resolution Analyst",routine:25,validation:25,analytical:30,judgment:20,workReshaped:30,capacityFreed:10,futureTitle:"Customer Resolution Specialist",opportunity:"Dispute automation",currentFocus:"Dispute triage, classification, and issue resolution support",futureFocus:"Complex case resolution, root-cause analysis, and stakeholder coordination",tasksReduce:"Manual case sorting, standard triage, repetitive follow-up",tasksGrow:"Complex resolution, root-cause analysis, cross-functional coordination",skills:"Customer engagement; Root-cause analysis; Issue resolution; Process understanding",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Interaction model shift",changeRationale:"The role becomes more complex-case oriented rather than being heavily reduced.",enablement:"Augment"},
+  {tower:"Order to Cash",role:"Revenue Assurance Analyst",routine:20,validation:30,analytical:35,judgment:15,workReshaped:32,capacityFreed:12,futureTitle:"Revenue Intelligence Analyst",opportunity:"Revenue analytics",currentFocus:"Revenue checks, leakage identification, and assurance reviews",futureFocus:"AI-driven revenue insight, anomaly interpretation, and business framing",tasksReduce:"Manual pattern reviews, standard checks, repetitive assurance tasks",tasksGrow:"Anomaly interpretation, insight framing, risk investigation, business engagement",skills:"Revenue analytics; Pattern detection; Business interpretation; Risk investigation",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The role moves toward analytical value creation which is positive but requires reskilling.",enablement:"Augment"},
+  {tower:"Order to Cash",role:"AR Reporting Analyst",routine:25,validation:25,analytical:35,judgment:15,workReshaped:29,capacityFreed:9,futureTitle:"AR Insight Reporting Analyst",opportunity:"AR reporting automation",currentFocus:"AR reporting, pack preparation, and performance reporting",futureFocus:"Insight-led receivables reporting and action-oriented commentary",tasksReduce:"Manual report assembly, repetitive reporting pack creation",tasksGrow:"Interpretation, issue highlighting, action-oriented reporting",skills:"Narrative reporting; Receivables insight; Stakeholder communication; Review quality",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The role identity remains intact but shifts toward interpretation and stakeholder-ready messaging.",enablement:"Augment"},
+  {tower:"Order to Cash",role:"O2C Operations Manager",routine:10,validation:20,analytical:40,judgment:30,workReshaped:18,capacityFreed:5,futureTitle:"O2C Digital Operations Leader",opportunity:"O2C transformation",currentFocus:"Team management, performance oversight, and service quality governance",futureFocus:"Digital workflow governance, value realization, and team transformation",tasksReduce:"Manual supervision, status chasing, fragmented oversight",tasksGrow:"Governance, coaching, transformation leadership, value tracking",skills:"Digital leadership; Process governance; Team coaching; Value realization",skillPriority:"High",changeComplexity:"High",changeDriver:"Leadership model shift",changeRationale:"The manager must redefine goals, coach teams through new workflows, and maintain trust in AI-supported decisions.",enablement:"Elevate"},
+  {tower:"Record to Report",role:"GL Accountant",routine:30,validation:35,analytical:25,judgment:10,workReshaped:32,capacityFreed:12,futureTitle:"AI-Enabled Accounting Analyst",opportunity:"Journal automation",currentFocus:"Journal posting, account review, and accounting validations",futureFocus:"Review-led accounting, exception handling, and close support",tasksReduce:"Manual posting, repetitive accounting checks, standard validations",tasksGrow:"Exception review, anomaly handling, financial interpretation",skills:"Accounting analytics; Anomaly detection; Review controls; Close support",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Work redesign",changeRationale:"The role evolves from processing toward review and interpretation while keeping a strong finance identity.",enablement:"Automate"},
+  {tower:"Record to Report",role:"Close Analyst",routine:35,validation:30,analytical:25,judgment:10,workReshaped:35,capacityFreed:14,futureTitle:"Close Orchestration Analyst",opportunity:"Close automation",currentFocus:"Close checklist execution, coordination, and issue follow-up",futureFocus:"Close orchestration, anomaly review, and faster exception resolution",tasksReduce:"Manual checklist coordination, repetitive close follow-up, standard close administration",tasksGrow:"Close orchestration, anomaly review, escalations, issue prioritization",skills:"Close orchestration; Issue analytics; Review controls; Exception management",skillPriority:"Medium",changeComplexity:"High",changeDriver:"Work redesign",changeRationale:"The role's operating model changes significantly, making trust in the new close process and role clarity important.",enablement:"Automate"},
+  {tower:"Record to Report",role:"Reconciliation Analyst",routine:40,validation:30,analytical:20,judgment:10,workReshaped:40,capacityFreed:16,futureTitle:"Intelligent Reconciliation Analyst",opportunity:"Reconciliation automation",currentFocus:"Transaction matching, variance resolution, and reconciliation review",futureFocus:"Variance investigation, targeted review, and control insight generation",tasksReduce:"Manual matching, repetitive reconciliation comparison, standard follow-up",tasksGrow:"Root-cause analysis, exception investigation, control issue interpretation",skills:"Root-cause analysis; Control analytics; Exception investigation; Review discipline",skillPriority:"Medium",changeComplexity:"High",changeDriver:"Role identity shift",changeRationale:"The role shifts from operational matching to analytical investigation — a meaningful identity change.",enablement:"Automate"},
+  {tower:"Record to Report",role:"Financial Reporting Analyst",routine:25,validation:25,analytical:35,judgment:15,workReshaped:30,capacityFreed:10,futureTitle:"Insight Reporting Analyst",opportunity:"Reporting automation",currentFocus:"Report preparation, pack compilation, and financial commentary support",futureFocus:"Narrative interpretation, quality review, and insight-led reporting",tasksReduce:"Data compilation, repetitive pack preparation, standard reporting assembly",tasksGrow:"Interpretation, narrative synthesis, review quality, stakeholder-ready messaging",skills:"Narrative reporting; Insight synthesis; Financial interpretation; Stakeholder communication",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The professional identity stays intact but the work mix shifts toward higher-value interpretation.",enablement:"Augment"},
+  {tower:"Record to Report",role:"Internal Controls Analyst",routine:20,validation:35,analytical:30,judgment:15,workReshaped:25,capacityFreed:8,futureTitle:"Digital Controls Analyst",opportunity:"Continuous controls monitoring",currentFocus:"Controls testing, evidence gathering, and compliance review",futureFocus:"Continuous controls monitoring, anomaly review, and governance insight",tasksReduce:"Routine checks, standard evidence preparation, repetitive testing",tasksGrow:"Variance investigation, anomaly analysis, targeted intervention",skills:"Control analytics; Governance monitoring; Risk interpretation; Exception review",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Automation exposure + control sensitivity",changeRationale:"The role becomes more signal-driven and insight-led, but governance discipline remains crucial.",enablement:"Augment"},
+  {tower:"Record to Report",role:"Accounting Policy Analyst",routine:10,validation:20,analytical:40,judgment:30,workReshaped:18,capacityFreed:6,futureTitle:"Accounting Policy Advisor",opportunity:"Policy analytics",currentFocus:"Policy interpretation, accounting guidance, and specialist advisory",futureFocus:"Faster advisory support with AI-assisted research and structured interpretation",tasksReduce:"Manual research, repetitive information gathering, standard reference searches",tasksGrow:"Interpretation, advisory framing, specialist guidance, stakeholder challenge",skills:"Policy research; Advisory communication; Specialist judgment; Insight framing",skillPriority:"Medium",changeComplexity:"Low",changeDriver:"Expectation uplift",changeRationale:"The role is augmented rather than fundamentally redesigned.",enablement:"Elevate"},
+  {tower:"Record to Report",role:"Intercompany Analyst",routine:30,validation:35,analytical:25,judgment:10,workReshaped:31,capacityFreed:11,futureTitle:"Intercompany Exception Analyst",opportunity:"Intercompany automation",currentFocus:"Intercompany transaction checks, mismatch handling, and coordination support",futureFocus:"Intercompany exception handling, issue resolution, and quality governance",tasksReduce:"Routine matching, standard checks, basic coordination",tasksGrow:"Exception resolution, issue governance, targeted investigation",skills:"Exception handling; Control analytics; Cross-functional coordination; Issue tracking",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Work redesign",changeRationale:"The role shifts toward exception management and targeted resolution.",enablement:"Automate"},
+  {tower:"Record to Report",role:"Finance Controller",routine:5,validation:20,analytical:40,judgment:35,workReshaped:18,capacityFreed:5,futureTitle:"Digital Finance Controller",opportunity:"Finance governance transformation",currentFocus:"Governance, signoff, financial oversight, and decision accountability",futureFocus:"Governance of AI-enabled finance processes, control integrity, and digital performance oversight",tasksReduce:"Manual review coordination, fragmented oversight, status chasing",tasksGrow:"Governance, digital control oversight, value tracking, manager coaching",skills:"Strategic finance leadership; Governance; Risk judgment; Digital oversight",skillPriority:"High",changeComplexity:"High",changeDriver:"Leadership model shift",changeRationale:"The controller's burden increases because they must oversee AI-supported decisions and control integrity.",enablement:"Elevate"},
+  {tower:"FP&A",role:"Budget Analyst",routine:25,validation:25,analytical:35,judgment:15,workReshaped:25,capacityFreed:8,futureTitle:"Budget Intelligence Analyst",opportunity:"Budget automation",currentFocus:"Budget preparation, consolidation, and assumption capture",futureFocus:"Scenario validation, assumption challenge, and budget insight support",tasksReduce:"Spreadsheet consolidation, repetitive updates, baseline budget assembly",tasksGrow:"Scenario validation, planning interpretation, assumption challenge",skills:"Scenario modeling; Planning analytics; Business interpretation; Forecast discipline",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The role shifts toward more analytical value but remains recognizably a planning role.",enablement:"Augment"},
+  {tower:"FP&A",role:"Forecasting Analyst",routine:25,validation:20,analytical:40,judgment:15,workReshaped:28,capacityFreed:9,futureTitle:"Forecast Intelligence Analyst",opportunity:"Predictive forecasting",currentFocus:"Forecast preparation, data refresh, and outlook consolidation",futureFocus:"Forecast interpretation, scenario challenge, and business-facing insight",tasksReduce:"Manual forecast refreshes, repetitive consolidation, data gathering",tasksGrow:"Interpretation, scenario analysis, business challenge, sensitivity review",skills:"Forecast analytics; Scenario planning; Data interpretation; Business challenge",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The biggest shift is from compilation to interpretation, so reskilling is important.",enablement:"Augment"},
+  {tower:"FP&A",role:"FP&A Analyst",routine:20,validation:20,analytical:40,judgment:20,workReshaped:30,capacityFreed:10,futureTitle:"Finance Insights Analyst",opportunity:"Decision intelligence",currentFocus:"Variance reporting, analysis support, and business commentary preparation",futureFocus:"Decision support, insight packaging, and sharper business interpretation",tasksReduce:"Data aggregation, repetitive variance prep, standard analysis formatting",tasksGrow:"Insight storytelling, decision support, recommendation development",skills:"Data storytelling; Decision analytics; Business interpretation; Insight packaging",skillPriority:"High",changeComplexity:"High",changeDriver:"Skill transformation",changeRationale:"The shift is professional as much as digital — from reporting-heavy work to insight and advisory.",enablement:"Augment"},
+  {tower:"FP&A",role:"Finance Business Partner",routine:10,validation:15,analytical:40,judgment:35,workReshaped:20,capacityFreed:6,futureTitle:"Strategic Finance Advisor",opportunity:"AI-assisted advisory",currentFocus:"Business support, challenge sessions, and performance dialogue",futureFocus:"Sharper strategic advisory enabled by faster insight generation",tasksReduce:"Low-value report preparation, manual information gathering",tasksGrow:"Decision advisory, executive dialogue, strategic influence, business framing",skills:"Executive communication; Strategic thinking; Business partnering; Insight translation",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Expectation uplift",changeRationale:"The role is augmented more than automated, but expectations for speed and influence rise.",enablement:"Elevate"},
+  {tower:"FP&A",role:"Scenario Modeling Analyst",routine:20,validation:20,analytical:45,judgment:15,workReshaped:32,capacityFreed:11,futureTitle:"Decision Simulation Analyst",opportunity:"Scenario simulation",currentFocus:"Scenario modeling, option analysis, and financial simulation",futureFocus:"AI-supported simulation, strategic option framing, and decision modeling",tasksReduce:"Manual model refreshes, repeated scenario calculations, data preparation",tasksGrow:"Strategic interpretation, scenario challenge, option framing, simulation insight",skills:"Scenario analytics; Decision modeling; Strategic interpretation; Advanced analysis",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The role becomes more powerful rather than less relevant.",enablement:"Augment"},
+  {tower:"FP&A",role:"Cost Analyst",routine:20,validation:25,analytical:40,judgment:15,workReshaped:27,capacityFreed:9,futureTitle:"Cost Intelligence Analyst",opportunity:"Cost analytics",currentFocus:"Cost reporting, driver analysis, and cost trend review",futureFocus:"AI-supported cost intelligence, driver insight, and business challenge",tasksReduce:"Repetitive cost reporting, standard trend reviews, manual data gathering",tasksGrow:"Driver interpretation, insight framing, business engagement, variance analysis",skills:"Cost analytics; Driver analysis; Business interpretation; Insight packaging",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The role moves from data gathering toward insight and business dialogue.",enablement:"Augment"},
+  {tower:"FP&A",role:"Management Reporting Analyst",routine:25,validation:20,analytical:35,judgment:20,workReshaped:29,capacityFreed:9,futureTitle:"Management Insight Reporting Analyst",opportunity:"Management reporting automation",currentFocus:"Management pack preparation, performance reporting, and commentary support",futureFocus:"Insight-led management reporting and executive-ready narrative",tasksReduce:"Manual pack assembly, repetitive reporting, standard commentary",tasksGrow:"Narrative interpretation, insight synthesis, stakeholder-ready messaging",skills:"Narrative reporting; Insight synthesis; Management communication; Stakeholder support",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The identity stays intact but the work shifts toward interpretation and narrative quality.",enablement:"Augment"},
+  {tower:"FP&A",role:"FP&A Manager",routine:10,validation:15,analytical:45,judgment:30,workReshaped:18,capacityFreed:5,futureTitle:"Finance Strategy Manager",opportunity:"FP&A leadership transformation",currentFocus:"Team oversight, planning governance, and FP&A performance management",futureFocus:"Digital planning governance, insight quality leadership, and strategic FP&A model",tasksReduce:"Manual supervision, fragmented oversight, status chasing",tasksGrow:"Governance, coaching, value realization, transformation leadership",skills:"Finance strategy; Digital planning leadership; Governance; Team development",skillPriority:"High",changeComplexity:"High",changeDriver:"Leadership model shift",changeRationale:"The FP&A manager must lead an increasingly AI-enabled planning function.",enablement:"Elevate"},
+  {tower:"Treasury",role:"Treasury Analyst",routine:20,validation:30,analytical:35,judgment:15,workReshaped:26,capacityFreed:8,futureTitle:"AI-Enabled Treasury Analyst",opportunity:"Liquidity analytics",currentFocus:"Cash position monitoring, liquidity reporting, and treasury operations",futureFocus:"AI-supported liquidity insight, anomaly review, and cash optimization",tasksReduce:"Manual cash reporting, repetitive position updates, standard treasury checks",tasksGrow:"Liquidity interpretation, anomaly review, cash optimization analysis",skills:"Treasury analytics; Cash optimization; Risk interpretation; AI finance tools",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"AI improves the speed and accuracy of treasury monitoring, reshaping how work is done.",enablement:"Augment"},
+  {tower:"Treasury",role:"Cash Forecasting Analyst",routine:20,validation:25,analytical:40,judgment:15,workReshaped:28,capacityFreed:9,futureTitle:"Intelligent Liquidity Analyst",opportunity:"Cash forecasting AI",currentFocus:"Cash forecast preparation, scenario analysis, and liquidity planning",futureFocus:"AI-model interpretation, scenario challenge, and forward-looking cash insight",tasksReduce:"Manual forecast refreshes, repetitive consolidation, standard scenario prep",tasksGrow:"Model interpretation, scenario challenge, business insight, liquidity framing",skills:"Forecast analytics; Scenario planning; Data interpretation; Business challenge",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"AI forecasting improves baseline generation but human context and challenge remain essential.",enablement:"Augment"},
+  {tower:"Treasury",role:"Banking Operations Specialist",routine:35,validation:30,analytical:25,judgment:10,workReshaped:30,capacityFreed:10,futureTitle:"Banking Workflow Analyst",opportunity:"Banking automation",currentFocus:"Bank account administration, payment queries, and banking coordination",futureFocus:"Automated banking workflow oversight and exception handling",tasksReduce:"Routine banking admin, standard payment follow-up, repetitive coordination",tasksGrow:"Workflow oversight, exception handling, banking relationship support",skills:"Workflow orchestration; Service analytics; Banking coordination; Issue triage",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Work redesign",changeRationale:"Routine banking operations can be increasingly automated while exception work remains human-led.",enablement:"Automate"},
+  {tower:"Treasury",role:"Treasury Risk Analyst",routine:20,validation:30,analytical:35,judgment:15,workReshaped:22,capacityFreed:7,futureTitle:"AI-Assisted Risk Analyst",opportunity:"Risk prediction",currentFocus:"Risk monitoring, assessment support, and escalation review",futureFocus:"Predictive risk sensing, targeted intervention, and AI-supported risk framing",tasksReduce:"Manual monitoring, standard reviews, repetitive screening",tasksGrow:"Early warning interpretation, targeted review, escalation judgment",skills:"Risk analytics; Decision framing; Scenario interpretation; Governance judgment",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Control sensitivity",changeRationale:"The role becomes more predictive but confidence in model signals and governance remain essential.",enablement:"Augment"},
+  {tower:"Treasury",role:"FX Analyst",routine:20,validation:25,analytical:40,judgment:15,workReshaped:24,capacityFreed:8,futureTitle:"Intelligent FX Analyst",opportunity:"FX analytics",currentFocus:"FX rate monitoring, exposure analysis, and hedging support",futureFocus:"AI-supported FX insight, exposure interpretation, and strategy framing",tasksReduce:"Routine rate checks, standard exposure updates, repetitive hedging preparation",tasksGrow:"Exposure interpretation, strategy framing, anomaly review, business insight",skills:"FX analytics; Exposure management; Business interpretation; Insight framing",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"AI improves analysis speed and quality but judgment and strategy remain human-centered.",enablement:"Augment"},
+  {tower:"Treasury",role:"Liquidity Planning Analyst",routine:20,validation:25,analytical:40,judgment:15,workReshaped:26,capacityFreed:8,futureTitle:"Liquidity Strategy Analyst",opportunity:"Liquidity planning transformation",currentFocus:"Liquidity forecasting, planning support, and position analysis",futureFocus:"Strategic liquidity insight, scenario challenge, and planning quality",tasksReduce:"Manual planning refreshes, repetitive position tracking, standard analysis",tasksGrow:"Scenario interpretation, strategic insight, business dialogue, planning challenge",skills:"Scenario analytics; Decision modeling; Strategic interpretation; Liquidity planning",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"AI supports better planning but human interpretation and business challenge remain central.",enablement:"Augment"},
+  {tower:"Treasury",role:"Treasury Controls Analyst",routine:20,validation:35,analytical:30,judgment:15,workReshaped:24,capacityFreed:8,futureTitle:"Digital Treasury Controls Analyst",opportunity:"Treasury controls monitoring",currentFocus:"Treasury controls testing, compliance checks, and documentation",futureFocus:"Continuous controls monitoring, anomaly review, and control insight",tasksReduce:"Manual testing, standard checks, repetitive evidence gathering",tasksGrow:"Anomaly analysis, exception review, governance insight, controls assurance",skills:"Control analytics; Governance monitoring; Risk interpretation; Exception review",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Automation exposure + control sensitivity",changeRationale:"The role becomes more signal-driven but governance discipline remains critical.",enablement:"Augment"},
+  {tower:"Treasury",role:"Treasury Manager",routine:10,validation:20,analytical:40,judgment:30,workReshaped:15,capacityFreed:4,futureTitle:"Digital Treasury Leader",opportunity:"Treasury transformation",currentFocus:"Treasury team leadership, governance, and risk oversight",futureFocus:"Digital treasury governance, transformation leadership, and strategic treasury model",tasksReduce:"Manual supervision, fragmented oversight, status chasing",tasksGrow:"Digital governance, coaching, value tracking, transformation leadership",skills:"Digital leadership; Treasury governance; Change leadership; Value realization",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Leadership model shift",changeRationale:"The treasury manager leads an increasingly AI-supported function with rising governance demands.",enablement:"Elevate"},
+  {tower:"Tax",role:"Tax Analyst",routine:20,validation:40,analytical:25,judgment:15,workReshaped:24,capacityFreed:7,futureTitle:"AI-Assisted Tax Analyst",opportunity:"Tax compliance automation",currentFocus:"Tax compliance checks, filing support, and validation",futureFocus:"Exception-led compliance review, policy interpretation, and governance assurance",tasksReduce:"Routine checks, standard filing preparation, repeated validations",tasksGrow:"Policy interpretation, exception review, governance assurance, regulatory judgment",skills:"Regulatory interpretation; Compliance analytics; AI validation; Governance controls",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Control sensitivity",changeRationale:"AI reduces repetitive checking but compliance integrity still depends on human validation.",enablement:"Augment"},
+  {tower:"Tax",role:"GST / VAT Specialist",routine:20,validation:40,analytical:25,judgment:15,workReshaped:26,capacityFreed:8,futureTitle:"Digital Indirect Tax Specialist",opportunity:"Tax automation",currentFocus:"Indirect tax calculations, filings, and compliance support",futureFocus:"AI-supported indirect tax oversight, exception review, and compliance governance",tasksReduce:"Manual calculations, repetitive filing prep, standard compliance checks",tasksGrow:"Exception review, compliance interpretation, governance assurance",skills:"Tax compliance; AI validation; Regulatory interpretation; Exception review",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Control sensitivity",changeRationale:"Automation reduces repetitive work while compliance governance remains human-led.",enablement:"Augment"},
+  {tower:"Tax",role:"Tax Reporting Analyst",routine:25,validation:35,analytical:25,judgment:15,workReshaped:25,capacityFreed:7,futureTitle:"Tax Insight Analyst",opportunity:"Tax reporting automation",currentFocus:"Tax report preparation, disclosure support, and data gathering",futureFocus:"Tax insight reporting, narrative interpretation, and compliance quality review",tasksReduce:"Manual report assembly, data gathering, repetitive disclosure preparation",tasksGrow:"Interpretation, narrative quality, compliance review, stakeholder reporting",skills:"Tax reporting; Narrative interpretation; Compliance quality; Stakeholder communication",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The role shifts from data assembly to interpretation and narrative quality.",enablement:"Augment"},
+  {tower:"Tax",role:"Transfer Pricing Analyst",routine:10,validation:20,analytical:40,judgment:30,workReshaped:18,capacityFreed:5,futureTitle:"AI-Augmented TP Analyst",opportunity:"Transfer pricing analytics",currentFocus:"TP analysis, benchmarking, and documentation support",futureFocus:"AI-supported TP insight, interpretation, and documentation quality",tasksReduce:"Manual benchmarking, standard documentation, repetitive data gathering",tasksGrow:"Interpretation, strategy framing, documentation quality, specialist advisory",skills:"Transfer pricing; AI analytics; Specialist judgment; Documentation quality",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"AI improves analytical support but specialist judgment and interpretation remain central.",enablement:"Elevate"},
+  {tower:"Tax",role:"Tax Compliance Analyst",routine:25,validation:40,analytical:20,judgment:15,workReshaped:22,capacityFreed:6,futureTitle:"Intelligent Tax Compliance Analyst",opportunity:"Tax compliance automation",currentFocus:"Compliance checks, return preparation, and validation support",futureFocus:"Compliance oversight, exception review, and governance assurance",tasksReduce:"Routine compliance checks, standard return preparation, repetitive validations",tasksGrow:"Exception review, policy interpretation, governance assurance",skills:"Compliance governance; AI validation; Regulatory interpretation; Exception review",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Control sensitivity",changeRationale:"Automation reduces repetitive compliance tasks while human validation remains essential.",enablement:"Augment"},
+  {tower:"Tax",role:"Tax Risk Analyst",routine:20,validation:35,analytical:30,judgment:15,workReshaped:20,capacityFreed:6,futureTitle:"Predictive Tax Risk Analyst",opportunity:"Tax risk analytics",currentFocus:"Tax risk monitoring, review support, and escalation assistance",futureFocus:"Predictive tax risk sensing, targeted review, and escalation judgment",tasksReduce:"Manual monitoring, standard risk reviews, repetitive screening",tasksGrow:"Early warning interpretation, targeted review, escalation judgment",skills:"Risk analytics; Tax governance; Scenario interpretation; Decision framing",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Control sensitivity",changeRationale:"The role becomes more predictive but tax governance sensitivity remains essential.",enablement:"Augment"},
+  {tower:"Tax",role:"Transfer Pricing Manager",routine:8,validation:15,analytical:42,judgment:35,workReshaped:14,capacityFreed:4,futureTitle:"Digital TP Leader",opportunity:"TP leadership transformation",currentFocus:"TP governance, team management, and regulatory oversight",futureFocus:"AI-enabled TP strategy, governance, and digital TP model",tasksReduce:"Manual oversight, status chasing, standard review coordination",tasksGrow:"Strategy leadership, governance, AI validation oversight, regulatory framing",skills:"TP strategy; Digital leadership; Governance; Regulatory judgment",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Leadership model shift",changeRationale:"The manager leads a more AI-supported TP function with broader governance expectations.",enablement:"Elevate"},
+  {tower:"Tax",role:"Tax Manager",routine:10,validation:20,analytical:40,judgment:30,workReshaped:12,capacityFreed:3,futureTitle:"Digital Tax Governance Leader",opportunity:"Tax governance",currentFocus:"Tax governance, team leadership, and compliance oversight",futureFocus:"Digital tax governance, AI-supported compliance model, and strategic tax leadership",tasksReduce:"Manual review coordination, fragmented oversight, status chasing",tasksGrow:"Digital governance, compliance strategy, transformation leadership",skills:"Tax strategy; Digital governance; Leadership; Compliance oversight",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Leadership model shift",changeRationale:"Tax manager expectations evolve as the function operates with more AI support.",enablement:"Elevate"},
+  {tower:"Finance Transformation",role:"Finance Process Analyst",routine:20,validation:25,analytical:40,judgment:15,workReshaped:28,capacityFreed:9,futureTitle:"Finance Redesign Analyst",opportunity:"Process redesign",currentFocus:"Process documentation, improvement analysis, and transformation support",futureFocus:"AI-enabled redesign, adoption planning, and scalable process transformation",tasksReduce:"Admin-heavy tracking, manual diagnostics, fragmented reporting",tasksGrow:"Future-state design, adoption enablement, value realization, process redesign",skills:"Process redesign; Change enablement; Structured problem solving; Transformation execution",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Capability expansion",changeRationale:"The role becomes more valuable and more complex as transformation includes AI, redesign, and adoption.",enablement:"Elevate"},
+  {tower:"Finance Transformation",role:"Lean Specialist",routine:20,validation:25,analytical:40,judgment:15,workReshaped:26,capacityFreed:8,futureTitle:"Digital Continuous Improvement Specialist",opportunity:"Digital CI",currentFocus:"Lean improvement, process efficiency, and waste reduction",futureFocus:"AI-augmented CI, digital lean practices, and scalable improvement models",tasksReduce:"Manual diagnostics, fragmented improvement tracking, admin-heavy coordination",tasksGrow:"Digital CI design, AI-enabled improvement, adoption support, value realization",skills:"Digital CI; Process analytics; Change enablement; Transformation execution",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Capability expansion",changeRationale:"The role expands its toolkit and influence by incorporating AI-enabled CI practices.",enablement:"Elevate"},
+  {tower:"Finance Transformation",role:"Finance Automation Analyst",routine:20,validation:25,analytical:40,judgment:15,workReshaped:30,capacityFreed:10,futureTitle:"Automation Product Analyst",opportunity:"Automation scaling",currentFocus:"Automation build, deployment support, and digital solution execution",futureFocus:"Automation product ownership, platform governance, and adoption-led digital delivery",tasksReduce:"Standalone script maintenance, fragmented automation tasks",tasksGrow:"Product ownership, governance, adoption support, scalable solution design",skills:"Automation design; Product thinking; Platform governance; User enablement",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Capability expansion",changeRationale:"The role shifts from building isolated automations to managing scalable digital products.",enablement:"Elevate"},
+  {tower:"Finance Transformation",role:"Finance Data Steward",routine:25,validation:30,analytical:30,judgment:15,workReshaped:24,capacityFreed:7,futureTitle:"Finance Data Governance Lead",opportunity:"Finance data governance",currentFocus:"Data stewardship, quality monitoring, and master data support",futureFocus:"Data governance leadership, quality standards, and stewardship model",tasksReduce:"Manual stewardship tasks, repetitive data corrections, standard checks",tasksGrow:"Governance leadership, quality standards, stewardship design, data policy",skills:"Data governance; Data quality; Stewardship leadership; Policy design",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Role elevation",changeRationale:"The role expands from operational stewardship to governance leadership.",enablement:"Elevate"},
+  {tower:"Finance Transformation",role:"Finance BI Analyst",routine:20,validation:25,analytical:40,judgment:15,workReshaped:32,capacityFreed:11,futureTitle:"Decision Intelligence Analyst",opportunity:"Decision intelligence",currentFocus:"BI reporting, dashboard support, and data analysis",futureFocus:"Decision intelligence, insight enablement, and AI-augmented analytics",tasksReduce:"Manual report builds, standard dashboard updates, repetitive data pulls",tasksGrow:"Insight design, decision intelligence, advanced analytics, stakeholder enablement",skills:"Decision analytics; BI design; Insight enablement; AI analytics",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Skill transformation",changeRationale:"The role evolves from report production toward decision intelligence and insight leadership.",enablement:"Elevate"},
+  {tower:"Finance Transformation",role:"Digital Finance Architect",routine:10,validation:20,analytical:40,judgment:30,workReshaped:18,capacityFreed:5,futureTitle:"Finance AI Architect",opportunity:"Finance architecture transformation",currentFocus:"Platform design, integration planning, and architecture governance",futureFocus:"AI-enabled finance ecosystem design and digital architecture strategy",tasksReduce:"Low-value coordination, static design reviews",tasksGrow:"Architecture choices, AI-enabled design, standards governance, ecosystem planning",skills:"Enterprise architecture; AI platform design; Governance; Design standards",skillPriority:"Medium",changeComplexity:"Medium",changeDriver:"Scope expansion",changeRationale:"AI expands the scope and complexity of the role rather than changing its fundamental identity.",enablement:"Elevate"},
+  {tower:"Finance Transformation",role:"Transformation Program Manager",routine:10,validation:20,analytical:40,judgment:30,workReshaped:15,capacityFreed:4,futureTitle:"Finance Transformation Leader",opportunity:"Transformation leadership",currentFocus:"Program governance, milestone tracking, and stakeholder coordination",futureFocus:"AI-enabled transformation governance, value realization, and adoption leadership",tasksReduce:"Manual tracking, fragmented reporting, admin-heavy coordination",tasksGrow:"Value governance, adoption leadership, AI transformation strategy",skills:"Transformation governance; Change leadership; Value realization; AI program management",skillPriority:"High",changeComplexity:"High",changeDriver:"Leadership model shift",changeRationale:"The transformation manager must lead AI adoption and value realization with higher accountability.",enablement:"Elevate"},
+  {tower:"Finance Transformation",role:"Finance Change Lead",routine:10,validation:20,analytical:35,judgment:35,workReshaped:16,capacityFreed:4,futureTitle:"Finance AI Change Lead",opportunity:"AI change enablement",currentFocus:"Change management, engagement, and adoption support",futureFocus:"AI-specific change leadership, adoption design, and people-centered transformation",tasksReduce:"Manual change tracking, fragmented engagement, standard communications",tasksGrow:"AI adoption design, leader coaching, change governance, value behavior change",skills:"AI change leadership; Adoption design; Executive coaching; Behavioral change",skillPriority:"High",changeComplexity:"High",changeDriver:"Capability expansion",changeRationale:"AI transformation requires a materially different change approach, expanding the role's complexity and importance.",enablement:"Elevate"},
+];
+
+const RAW_MAX=71.5;
+ROLES.forEach(r=>{
+  const w={High:3,Medium:2,Low:1};
+  r.priorityScore=Math.round(((r.workReshaped*.5)+(r.capacityFreed*.3)+(w[r.skillPriority]||2)*4)/RAW_MAX*100);
+  r.priorityLabel=r.priorityScore>=50?"High":r.priorityScore>=33?"Medium":"Foundational";
+});
+
+const TOWERS=[...new Set(ROLES.map(r=>r.tower))];
+const TOWER_COLORS={"Procure to Pay":"#0F62FE","Order to Cash":"#00B0A0","Record to Report":"#8B5CF6","FP&A":"#F59E0B","Treasury":"#EC4899","Tax":"#EF4444","Finance Transformation":"#10B981"};
+
+// ── NAV ────────────────────────────────────────────────────────────────────
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const map={overview:'Overview',explorer:'Role Explorer',roadmap:'Roadmap',methodology:'Methodology'};
+  document.querySelectorAll('.nav-tab').forEach(t=>{if(t.textContent.trim()===map[id])t.classList.add('active')});
+  if(id==='overview')renderOverview();
+  if(id==='explorer')initExplorer();
+  if(id==='roadmap')renderRoadmap();
+  if(id==='methodology')renderMethodology();
+}
+
+// ── OVERVIEW ───────────────────────────────────────────────────────────────
+function renderOverview(){
+  const avg=Math.round(ROLES.reduce((s,r)=>s+r.workReshaped,0)/ROLES.length);
+  const high=ROLES.filter(r=>r.priorityLabel==='High').length;
+  const ec={Automate:0,Augment:0,Elevate:0};
+  ROLES.forEach(r=>ec[r.enablement]++);
+  document.getElementById('heroStats').innerHTML=`
+    <div class="stat-card sc-blue">
+      <div class="stat-label">Avg Work Reshaped by AI</div>
+      <div class="stat-value">${avg}%</div>
+      <div class="stat-sub">Across all 56 finance roles</div>
+    </div>
+    <div class="stat-card sc-teal">
+      <div class="stat-label">High Priority Roles</div>
+      <div class="stat-value">${high}</div>
+      <div class="stat-sub">Require immediate transformation focus</div>
+    </div>
+    <div class="stat-card sc-amber">
+      <div class="stat-label">AI Enablement Mix</div>
+      <div class="stat-value" style="font-size:1.4rem;padding-top:4px">
+        <span style="color:var(--blue)">${ec.Automate}</span> · <span style="color:var(--teal)">${ec.Augment}</span> · <span style="color:var(--amber)">${ec.Elevate}</span>
+      </div>
+      <div class="stat-pills">
+        <span class="sp sp-a">Automate ${ec.Automate}</span>
+        <span class="sp sp-g">Augment ${ec.Augment}</span>
+        <span class="sp sp-e">Elevate ${ec.Elevate}</span>
+      </div>
+    </div>`;
+
+  // Populate bubble tower filter
+  const tf=document.getElementById('bubbleTowerFilter');
+  if(tf.options.length===1){TOWERS.forEach(t=>{const o=document.createElement('option');o.value=t;o.text=t;tf.appendChild(o)});}
+
+  // Legend
+  document.getElementById('bubbleLegend').innerHTML=TOWERS.map(t=>`
+    <div class="bl-item" onclick="filterBubbleTower('${t}')">
+      <div class="bl-dot" style="background:${TOWER_COLORS[t]}"></div>${t}
+    </div>`).join('');
+
+  drawBubble();
+  renderTop10();
+}
+
+function filterBubbleTower(t){
+  document.getElementById('bubbleTowerFilter').value=t;
+  drawBubble();
+}
+
+// ── BUBBLE CHART ───────────────────────────────────────────────────────────
+let bubbleRects=[];
+function drawBubble(){
+  const canvas=document.getElementById('bubbleCanvas');
+  const towerF=document.getElementById('bubbleTowerFilter').value;
+  const data=towerF==='All'?ROLES:ROLES.filter(r=>r.tower===towerF);
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.parentElement.clientWidth-48;
+  const H=420;
+  canvas.style.width=W+'px';
+  canvas.style.height=H+'px';
+  canvas.width=W*dpr;
+  canvas.height=H*dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  const PAD={l:52,r:24,t:20,b:46};
+  const cW=W-PAD.l-PAD.r;
+  const cH=H-PAD.t-PAD.b;
+
+  // Grid
+  ctx.strokeStyle='#EEF2F8';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const x=PAD.l+i*(cW/4);
+    ctx.beginPath();ctx.moveTo(x,PAD.t);ctx.lineTo(x,PAD.t+cH);ctx.stroke();
+    const y=PAD.t+i*(cH/4);
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cW,y);ctx.stroke();
+  }
+
+  // Axis labels
+  ctx.fillStyle='#94A3B8';ctx.font='600 11px DM Sans';ctx.textAlign='center';
+  [0,25,50,75,100].forEach((v,i)=>{
+    ctx.fillText(v+'%',PAD.l+i*(cW/4),H-8);
+  });
+  ctx.save();ctx.translate(14,PAD.t+cH/2);ctx.rotate(-Math.PI/2);
+  ctx.fillText('Capacity Freed %',0,0);ctx.restore();
+  [0,10,20,30].forEach((v,i)=>{
+    ctx.fillText(v+'%',10,PAD.t+cH-i*(cH/3));
+  });
+
+  // Bubbles
+  bubbleRects=[];
+  const maxPri=Math.max(...ROLES.map(r=>r.priorityScore));
+  data.forEach(r=>{
+    const cx=PAD.l+(r.workReshaped/100)*cW;
+    const cy=PAD.t+cH-(r.capacityFreed/32)*cH;
+    const rad=6+(r.priorityScore/maxPri)*22;
+    const col=TOWER_COLORS[r.tower]||'#0F62FE';
+    ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);
+    ctx.fillStyle=col+'33';ctx.fill();
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
+    bubbleRects.push({r,cx,cy,rad});
+  });
+}
+
+// Tooltip
+const tip=document.getElementById('bubbleTip');
+document.getElementById('bubbleCanvas').addEventListener('mousemove',e=>{
+  const canvas=document.getElementById('bubbleCanvas');
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  let hit=null;
+  for(const b of bubbleRects){
+    if(Math.hypot(mx-b.cx,my-b.cy)<=b.rad){hit=b;break;}
+  }
+  if(hit){
+    tip.style.opacity='1';
+    tip.style.left=(e.clientX+12)+'px';
+    tip.style.top=(e.clientY-10)+'px';
+    const bc={Automate:'#93c5fd',Augment:'#6ee7e7',Elevate:'#fcd34d'};
+    tip.innerHTML=`<strong>${hit.r.role}</strong>${hit.r.tower}<br/>Work Reshaped: <b>${hit.r.workReshaped}%</b><br/>Capacity Freed: <b>${hit.r.capacityFreed}%</b><br/>Priority: <b>${hit.r.priorityScore}%</b> · <span style="color:${bc[hit.r.enablement]}">${hit.r.enablement}</span>`;
+  } else {
+    tip.style.opacity='0';
+  }
+});
+document.getElementById('bubbleCanvas').addEventListener('click',e=>{
+  const canvas=e.target;
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  for(const b of bubbleRects){
+    if(Math.hypot(mx-b.cx,my-b.cy)<=b.rad){
+      goToRole(b.r.tower,b.r.role);return;
+    }
+  }
+});
+document.getElementById('bubbleCanvas').addEventListener('mouseleave',()=>tip.style.opacity='0');
+
+// ── TOP 10 ─────────────────────────────────────────────────────────────────
+function renderTop10(){
+  const top=[...ROLES].sort((a,b)=>b.priorityScore-a.priorityScore).slice(0,10);
+  const max=top[0].priorityScore;
+  document.getElementById('top10Grid').innerHTML=top.map((r,i)=>`
+    <div class="top10-item" onclick="goToRole('${r.tower}','${r.role}')">
+      <div class="top10-rank">${i+1}</div>
+      <div class="top10-info">
+        <div class="top10-role">${r.role}</div>
+        <div class="top10-tower">${r.tower}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="badge b-${r.enablement.toLowerCase()}">${r.enablement}</span>
+        <span class="badge b-${r.priorityLabel.toLowerCase()}">${r.priorityLabel}</span>
+      </div>
+      <div class="top10-bar-wrap">
+        <div class="top10-bar-bg"><div class="top10-bar-fill" style="width:${(r.priorityScore/max)*100}%"></div></div>
+        <div class="top10-pct">${r.priorityScore}%</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── EXPLORER ───────────────────────────────────────────────────────────────
+let activeTower=TOWERS[0], selectedRole=null;
+function initExplorer(){
+  const tabs=document.getElementById('towerTabs');
+  if(!tabs.innerHTML){
+    TOWERS.forEach((t,i)=>{
+      const btn=document.createElement('button');
+      btn.className='tower-tab'+(i===0?' active':'');
+      btn.textContent=t;
+      btn.onclick=()=>selectTower(t,btn);
+      tabs.appendChild(btn);
+    });
+  }
+  renderRoleCards(activeTower);
+}
+
+function selectTower(t,btn){
+  activeTower=t;
+  document.querySelectorAll('.tower-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedRole=null;
+  document.getElementById('roleDetailPanel').innerHTML='';
+  renderRoleCards(t);
+}
+
+const eClass={Automate:'rc-automate',Augment:'rc-augment',Elevate:'rc-elevate'};
+function renderRoleCards(tower){
+  const roles=ROLES.filter(r=>r.tower===tower);
+  document.getElementById('roleCardsGrid').innerHTML=roles.map(r=>`
+    <div class="role-card ${eClass[r.enablement]}${selectedRole===r.role?' selected':''}" onclick="selectRole('${r.role}',this)">
+      <div class="rc-role">${r.role}</div>
+      <div class="rc-future">→ ${r.futureTitle}</div>
+      <div class="rc-metrics">
+        <div class="rc-metric">
+          <div class="rc-metric-val">${r.workReshaped}%</div>
+          <div class="rc-metric-lbl">Reshaped</div>
+        </div>
+        <div class="rc-metric">
+          <div class="rc-metric-val">${r.capacityFreed}%</div>
+          <div class="rc-metric-lbl">Freed</div>
+        </div>
+        <div class="rc-metric">
+          <div class="rc-metric-val">${r.priorityScore}%</div>
+          <div class="rc-metric-lbl">Priority</div>
+        </div>
+      </div>
+      <div class="rc-badges">
+        <span class="badge b-${r.priorityLabel.toLowerCase()}">${r.priorityLabel}</span>
+        <span class="badge b-${r.enablement.toLowerCase()}">${r.enablement}</span>
+      </div>
+    </div>`).join('');
+}
+
+function selectRole(roleName, el){
+  selectedRole=roleName;
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  const r=ROLES.find(x=>x.tower===activeTower&&x.role===roleName);
+  renderRoleDetail(r);
+  setTimeout(()=>document.getElementById('roleDetailPanel').scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function renderRoleDetail(r){
+  if(!r)return;
+  const soWhatMap={High:"Act now — this role has the highest transformation priority. Redesign, reskill, and set clear future-state expectations before automation widens the gap.",Medium:"Plan ahead — this role will shift meaningfully. Build a reskilling roadmap and communicate the future direction before change pressure builds.",Foundational:"Maintain momentum — this role has lower automation exposure but still needs to evolve. Focus on incremental skill development and digital readiness."};
+  const cx=(l)=>[1,2,3].map(i=>`<div class="cx-dot${i<={High:3,Medium:2,Low:1}[l]?` on-${l.toLowerCase()}`:''}"></div>`).join('');
+  const skills=r.skills.split(';').map(s=>`<span class="skill-pill">${s.trim()}</span>`).join('');
+  document.getElementById('roleDetailPanel').innerHTML=`
+    <div class="role-detail-panel">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <h2 style="font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--navy)">${r.role}</h2>
+        <span class="badge b-${r.priorityLabel.toLowerCase()}">${r.priorityLabel} Priority</span>
+        <span class="badge b-${r.enablement.toLowerCase()}">${r.enablement}</span>
+        <span style="font-size:.85rem;color:var(--blue);font-weight:600;margin-left:4px">→ ${r.futureTitle}</span>
+      </div>
+      <div class="so-what">
+        <div class="sw-label">Leadership Action Signal</div>
+        <div class="sw-text">${soWhatMap[r.priorityLabel]}</div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-block">
+          <div class="mb-label">Work Reshaped by AI</div>
+          <div class="mb-value">${r.workReshaped}%</div>
+          <div class="mb-bar"><div class="mb-fill" style="width:${r.workReshaped}%;background:var(--blue)"></div></div>
+          <div class="mb-sub">Share of activities changed</div>
+        </div>
+        <div class="metric-block">
+          <div class="mb-label">Capacity Freed Up</div>
+          <div class="mb-value">${r.capacityFreed}%</div>
+          <div class="mb-bar"><div class="mb-fill" style="width:${r.capacityFreed*2.8}%;background:var(--teal)"></div></div>
+          <div class="mb-sub">Realistic productive release</div>
+        </div>
+        <div class="metric-block">
+          <div class="mb-label">Transformation Priority</div>
+          <div class="mb-value">${r.priorityScore}%</div>
+          <div class="mb-bar"><div class="mb-fill" style="width:${r.priorityScore}%;background:var(--amber)"></div></div>
+          <div class="mb-sub">Composite priority score</div>
+        </div>
+        <div class="metric-block">
+          <div class="mb-label">Change Complexity</div>
+          <div class="mb-value" style="font-size:1.4rem;padding-top:4px">${r.changeComplexity}</div>
+          <div class="cx-dots">${cx(r.changeComplexity)}</div>
+          <div class="mb-sub">${r.changeDriver}</div>
+        </div>
+      </div>
+      <div class="detail-2col">
+        <div class="card">
+          <div class="card-title">Task Composition</div>
+          <div class="card-sub">Current work type mix</div>
+          <div class="task-row"><span class="task-name">Routine</span><div class="task-bar-bg"><div class="task-bar-fill tb-r" style="width:${r.routine}%"></div></div><span class="task-pct">${r.routine}%</span></div>
+          <div class="task-row"><span class="task-name">Validation</span><div class="task-bar-bg"><div class="task-bar-fill tb-v" style="width:${r.validation}%"></div></div><span class="task-pct">${r.validation}%</span></div>
+          <div class="task-row"><span class="task-name">Analytical</span><div class="task-bar-bg"><div class="task-bar-fill tb-a" style="width:${r.analytical}%"></div></div><span class="task-pct">${r.analytical}%</span></div>
+          <div class="task-row"><span class="task-name">Judgment</span><div class="task-bar-bg"><div class="task-bar-fill tb-j" style="width:${r.judgment}%"></div></div><span class="task-pct">${r.judgment}%</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Current → Future Focus</div>
+          <div class="card-sub">${r.role} → <strong style="color:var(--blue)">${r.futureTitle}</strong></div>
+          <div class="focus-box">
+            <div class="fb-label">Current Focus</div>
+            <div class="fb-text">${r.currentFocus}</div>
+          </div>
+          <div class="focus-box" style="background:#EEF7F5;border:1px solid #B0EDE6">
+            <div class="fb-label" style="color:var(--teal)">Future Focus</div>
+            <div class="fb-text">${r.futureFocus}</div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-2col">
+        <div class="card">
+          <div class="card-title">Work Shift</div>
+          <div class="card-sub">Tasks reducing vs growing under AI</div>
+          <div class="focus-box" style="background:#FFF2F2;border:1px solid #FECACA">
+            <div class="fb-label" style="color:#DC2626">Tasks Likely to Reduce</div>
+            <div class="fb-text">${r.tasksReduce}</div>
+          </div>
+          <div class="focus-box" style="background:#F0FFF8;border:1px solid #A7F3D0">
+            <div class="fb-label" style="color:#059669">Tasks Likely to Grow</div>
+            <div class="fb-text">${r.tasksGrow}</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Key Future Skills <span style="font-size:.78rem;font-weight:400;color:var(--muted);margin-left:6px">Skill Priority: <span class="badge b-${r.skillPriority.toLowerCase()}">${r.skillPriority}</span></span></div>
+          <div class="card-sub">Capabilities required for the AI-enabled future state</div>
+          <div style="margin-top:6px">${skills}</div>
+          <hr class="div" style="margin:14px 0"/>
+          <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px">Change Rationale</div>
+          <div style="font-size:.84rem;color:var(--navy);line-height:1.55">${r.changeRationale}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function goToRole(tower,role){
+  activeTower=tower;
+  selectedRole=role;
+  showPage('explorer');
+  setTimeout(()=>{
+    document.querySelectorAll('.tower-tab').forEach(b=>{
+      b.classList.toggle('active',b.textContent===tower);
+    });
+    renderRoleCards(tower);
+    const card=[...document.querySelectorAll('.role-card')].find(c=>c.querySelector('.rc-role')?.textContent===role);
+    if(card)selectRole(role,card);
+  },80);
+}
+
+// ── ROADMAP ────────────────────────────────────────────────────────────────
+function renderRoadmap(){
+  const chipCls={Automate:'chip-a',Augment:'chip-g',Elevate:'chip-e'};
+  let html=TOWERS.map(tower=>{
+    const roles=ROLES.filter(r=>r.tower===tower);
+    const col=TOWER_COLORS[tower]||'var(--blue)';
+    return `<div class="roadmap-row">
+      <div class="tower-lbl"><div class="tower-dot" style="background:${col}"></div>${tower}</div>
+      ${['Automate','Augment','Elevate'].map(ph=>`
+        <div class="roadmap-chips">
+          ${roles.filter(r=>r.enablement===ph).map(r=>`<span class="r-chip ${chipCls[ph]}" onclick="goToRole('${r.tower}','${r.role}')" title="${r.workReshaped}% reshaped">${r.role}</span>`).join('')||'<span style="font-size:.7rem;color:var(--muted);font-style:italic">—</span>'}
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+  document.getElementById('roadmapContent').innerHTML=html;
+
+  const total=ROLES.length;
+  const cnt={Automate:0,Augment:0,Elevate:0};
+  ROLES.forEach(r=>cnt[r.enablement]++);
+  const barCol={Automate:'var(--blue)',Augment:'var(--teal)',Elevate:'var(--amber)'};
+  document.getElementById('enablementBars').innerHTML=Object.entries(cnt).map(([t,n])=>`
+    <div class="task-row">
+      <span class="task-name">${t}</span>
+      <div class="task-bar-bg"><div class="task-bar-fill" style="width:${(n/total)*100}%;background:${barCol[t]}"></div></div>
+      <span class="task-pct">${n}</span>
+    </div>`).join('');
+}
+
+// ── METHODOLOGY ────────────────────────────────────────────────────────────
+function renderMethodology(){
+  const defs=[
+    {icon:`<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,title:"Work Reshaped by AI (%)",body:`Share of activities likely to be changed through automation, AI assistance, or workflow orchestration. <strong>Informed by</strong> task composition — routine, validation, analytical, and judgment work. Higher routine and validation mixes show stronger reshape potential.`},
+    {icon:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,title:"Productive Capacity Freed Up (%)",body:`Indicative share of time releasable from manual effort toward higher-value work. <strong>Always lower than Work Reshaped</strong> because some effort shifts into exception handling, review, governance, and judgment rather than being eliminated.`},
+    {icon:`<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`,title:"Task Composition",body:`Breakdown across four work types: <strong>Routine</strong> (repetitive execution), <strong>Validation</strong> (checks and controls), <strong>Analytical</strong> (interpretation and modeling), and <strong>Judgment</strong> (strategic and stakeholder decisions). Always sums to 100%.`},
+    {icon:`<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,title:"Change Complexity",body:`How difficult it may be to transition the role into the future-state model. Rated by: degree of role redesign, identity shift, skill uplift required, manager enablement, and control or compliance sensitivity. <strong>Levels:</strong> High, Medium, Low.`},
+    {icon:`<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>`,title:"Skill Priority",body:`Urgency of capability development needed for the future state. <strong>High</strong> = major skill shift or multiple new capabilities. <strong>Medium</strong> = moderate capability expansion. <strong>Low</strong> = limited incremental uplift. Feeds directly into the priority score calculation.`},
+    {icon:`<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,title:"AI Enablement Type",body:`<strong>Automate:</strong> AI tools take over a meaningful portion of routine work. <strong>Augment:</strong> AI assists human work; people remain central. <strong>Elevate:</strong> AI removes low-value effort so roles can focus on judgment, leadership, or strategic contribution.`},
+    {icon:`<svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>`,title:"Transformation Priority (%)",body:`Normalized indicator of transformation urgency. <strong>Formula:</strong> (0.5 × Work Reshaped) + (0.3 × Capacity Freed) + (Skill Weight × 4), normalized to 100. Skill weights: High=3, Medium=2, Low=1. <strong>Levels:</strong> High ≥50%, Medium 33–49%, Foundational &lt;33%.`},
+    {icon:`<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,title:"Transformation Opportunity",body:`The most relevant AI transformation lever for the role. Examples: Invoice automation, Cash application automation, Reconciliation automation, Predictive forecasting, Continuous controls monitoring, Decision intelligence, AI-assisted advisory, and more.`},
+  ];
+  document.getElementById('defGrid').innerHTML=defs.map(d=>`
+    <div class="def-card">
+      <div class="def-card-title"><div class="def-icon">${d.icon}</div>${d.title}</div>
+      <div class="def-body">${d.body}</div>
+    </div>`).join('');
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+renderOverview();
+window.addEventListener('resize',()=>{if(document.getElementById('page-overview').classList.contains('active'))drawBubble();});
+</script>
+
+<div class="footnote">
+  Finance Role Transformation Explorer · 56 roles across 7 towers · Percentages informed by task composition (routine, validation, analytical, judgment) and complemented by qualitative role, change, and skills narratives.
+</div>
+</body>
+</html>
